@@ -1,0 +1,9 @@
+Exercício 2.2
+- Calcular gradiente;
+- Calcular Matriz Hessiana;
+- Especificar e justificar se a função é convexa, concava ou nenhuma;
+- Faça uma alteração de variáveis para pré-condicionar a função, usando o Hessian no nível de
+Ponto especificado ̄x. Observe que a matriz para uma mudança de variáveis deve ser
+positivo definitivo.
+
+f(x1, x2) = 0{,}5 x_1^2 + 4{,}5 x_2^2
