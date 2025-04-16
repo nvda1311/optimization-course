@@ -1,1 +1,786 @@
+print("\n# CAP2 - EXERCICIO 2.2. QUESTÃO 1")
+
+import math
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Definindo a função
+f = 0.5 * x1**2 + 4.5 * x2**2
+
+# Gradiente: vetor das derivadas parciais
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+
+# Hessiana: matriz das segundas derivadas
+hess_f = sp.hessian(f, (x1, x2))
+
+# Exibindo os resultados
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\nMatriz Hessiana:")
+sp.pprint(hess_f)
+
+#CHecar se a matriz é convexa, concava ou nenhuma.
+def verifica_convexidade(f, vars):
+    H = sp.hessian(f, vars)
+    autovalores_de_h = H.eigenvals(multiple=True)
+
+    diagonal_nao_negativa = all(val.is_nonnegative for val in autovalores_de_h)
+    diagonal_nao_positiva = all(val.is_nonpositive for val in autovalores_de_h)
+
+    if diagonal_nao_negativa:
+        return "Função convexa, pois os autovalores da matriz hessiana são positivos."
+    elif diagonal_nao_positiva:
+        return "Função côncava, pois os autovalores da matriz hessiana não são todos positivos."
+    else:
+        return "Função nem côncava, nem convexa."
+
+print("***** Concavidade *****")
+
+print(verifica_convexidade(f, (x1,x2)))
+
+print("***** Gradiente no ponto especificado *****")
+x_barra = {x1: 0, x2: 0}
+gradiente_no_ponto = [g.subs(x_barra) for g in grad_f]
+print("Gradiente em x1 = 0 e x2 = 0: ")
+sp.pprint(gradiente_no_ponto)
+
+
+print("***** Curvatura na direção *****")
+d = sp.Matrix([1/math.sqrt(2), 1/math.sqrt(2)])
+d = d / sp.sqrt(d.dot(d))  # Normaliza o vetor direção (opcional, mas comum)
+
+curvatura = (d.T * hess_f * d)[0]  # usa hess_f diretamente, pois é constante
+print(f"\nCurvatura na direção d = (1/sqrt(2), 1/sqrt(2)) = {curvatura}")
+
+
+print("***** Pre-condicionamento ******")
+
+# Variáveis originais
+x1, x2 = sp.symbols('x1 x2')
+x = sp.Matrix([x1, x2])
+
+# Função original
+f = 0.5 * x1**2 + 4.5 * x2**2
+
+# Hessiana
+H = sp.hessian(f, (x1, x2))
+
+# Verificar se a Hessiana é simétrica
+if not H.is_symmetric():
+    print("A Hessiana não é simétrica, forçando a simetria.")
+    H = (H + H.T) / 2  # Forçar simetria
+
+# Verificar se a Hessiana é definida positiva
+autovalores = H.eigenvals()
+if all(val.is_positive for val in autovalores):
+    print("A Hessiana é definida positiva.")
+    # Decomposição de Cholesky da Hessiana (pré-condicionador)
+    try:
+        L = H.cholesky()  # H = L * L.T
+        print("Decomposição de Cholesky realizada com sucesso!")
+    except ValueError as e:
+        print(f"Erro na decomposição de Cholesky: {e}")
+else:
+    print("A Hessiana não é definida positiva, a decomposição de Cholesky não pode ser realizada.")
+
+# Nova variável z
+z1, z2 = sp.symbols('z1 z2')
+z = sp.Matrix([z1, z2])
+
+# Substituindo x = L * z na função original
+x_new = L * z if 'L' in locals() else None  # Verifica se L foi calculado
+if x_new is not None:
+    f_precond = f.subs({x1: x_new[0], x2: x_new[1]})
+
+    # Simplificando a nova função
+    f_precond_simplificada = sp.simplify(f_precond)
+
+    # Resultados
+    print("\n***** Matriz L (pré-condicionador) *****")
+    sp.pprint(L)
+
+    print("\n***** Função transformada f̃(z) *****")
+    sp.pprint(f_precond_simplificada)
+else:
+    print("Não foi possível realizar o pré-condicionamento devido à Hessiana não definida positiva.")
+
+
+print("\n# CAP2 - EXERCICIO 2.2. QUESTÃO 2")
+
+import math
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Definindo a função
+f = (1/3)*x1**3 + x2**3 - x1 - x2
+
+# Gradiente: vetor das derivadas parciais
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+
+# Hessiana: matriz das segundas derivadas
+hess_f = sp.hessian(f, (x1, x2))
+
+# Exibindo os resultados
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\nMatriz Hessiana:")
+sp.pprint(hess_f)
+
+#CHecar se a matriz é convexa, concava ou nenhuma.
+def verifica_convexidade(f, vars):
+    H = sp.hessian(f, vars)
+    autovalores_de_h = H.eigenvals(multiple=True)
+
+    diagonal_nao_negativa = all(val.is_nonnegative for val in autovalores_de_h)
+    diagonal_nao_positiva = all(val.is_nonpositive for val in autovalores_de_h)
+
+    if diagonal_nao_negativa:
+        return "Função convexa, pois os autovalores da matriz hessiana são positivos."
+    elif diagonal_nao_positiva:
+        return "Função côncava, pois os autovalores da matriz hessiana não são todos positivos."
+    else:
+        return "Função nem côncava, nem convexa."
+
+print("***** Concavidade *****")
+
+print(verifica_convexidade(f, (x1,x2)))
+
+print("***** Gradiente no ponto especificado *****")
+x_barra = {x1: 9, x2: 1}
+gradiente_no_ponto = [g.subs(x_barra) for g in grad_f]
+print("Gradiente em x1 = 9 e x2 = 1: ")
+sp.pprint(gradiente_no_ponto)
+
+
+print("***** Curvatura na direção *****")
+d = sp.Matrix([1/math.sqrt(2), 1/math.sqrt(2)])
+d = d / sp.sqrt(d.dot(d))
+
+curvatura = (d.T * hess_f * d)[0]
+print(f"\nCurvatura na direção d = (1/sqrt(2), 1/sqrt(2)) = {curvatura}")
+
+print("***** Pre-condicionamento ******")
+
+# Variáveis originais
+x1, x2 = sp.symbols('x1 x2')
+x = sp.Matrix([x1, x2])
+
+# Função original
+f = (1/3)*x1**3 + x2**3 - x1 - x2
+
+# Hessiana
+H = sp.hessian(f, (x1, x2))
+
+# Verificar se a Hessiana é simétrica
+if not H.is_symmetric():
+    print("A Hessiana não é simétrica, forçando a simetria.")
+    H = (H + H.T) / 2  # Forçar simetria
+
+# Verificar se a Hessiana é definida positiva
+autovalores = H.eigenvals()
+if all(val.is_positive for val in autovalores):
+    print("A Hessiana é definida positiva.")
+    # Decomposição de Cholesky da Hessiana (pré-condicionador)
+    try:
+        L = H.cholesky()  # H = L * L.T
+        print("Decomposição de Cholesky realizada com sucesso!")
+    except ValueError as e:
+        print(f"Erro na decomposição de Cholesky: {e}")
+else:
+    print("A Hessiana não é definida positiva, a decomposição de Cholesky não pode ser realizada.")
+
+# Nova variável z
+z1, z2 = sp.symbols('z1 z2')
+z = sp.Matrix([z1, z2])
+
+# Substituindo x = L * z na função original
+x_new = L * z if 'L' in locals() else None  # Verifica se L foi calculado
+if x_new is not None:
+    f_precond = f.subs({x1: x_new[0], x2: x_new[1]})
+
+    # Simplificando a nova função
+    f_precond_simplificada = sp.simplify(f_precond)
+
+    # Resultados
+    print("\n***** Matriz L (pré-condicionador) *****")
+    sp.pprint(L)
+
+    print("\n***** Função transformada f̃(z) *****")
+    sp.pprint(f_precond_simplificada)
+else:
+    print("Não foi possível realizar o pré-condicionamento devido à Hessiana não definida positiva.")
+
+print("\n# CAP2 - EXERCICIO 2.2. QUESTÃO 3")
+
+import math
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Definindo a função
+f = (x1 - 2)**4 + (x1 - 2)**2 * (x2**2) + (x2 + 1)**2
+
+# Gradiente: vetor das derivadas parciais
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+
+# Hessiana: matriz das segundas derivadas
+hess_f = sp.hessian(f, (x1, x2))
+
+# Exibindo os resultados
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\nMatriz Hessiana:")
+sp.pprint(hess_f)
+
+#CHecar se a matriz é convexa, concava ou nenhuma.
+def verifica_convexidade(f, vars):
+    H = sp.hessian(f, vars)
+    autovalores_de_h = H.eigenvals(multiple=True)
+
+    diagonal_nao_negativa = all(val.is_nonnegative for val in autovalores_de_h)
+    diagonal_nao_positiva = all(val.is_nonpositive for val in autovalores_de_h)
+
+    if diagonal_nao_negativa:
+        return "Função convexa, pois os autovalores da matriz hessiana são positivos."
+    elif diagonal_nao_positiva:
+        return "Função côncava, pois os autovalores da matriz hessiana não são todos positivos."
+    else:
+        return "Função nem côncava, nem convexa."
+
+print("***** Concavidade *****")
+
+print(verifica_convexidade(f, (x1,x2)))
+
+print("***** Gradiente no ponto especificado *****")
+x_barra = {x1: 2, x2: -1}
+gradiente_no_ponto = [g.subs(x_barra) for g in grad_f]
+print("Gradiente em x1 = 2 e x2 = -1: ")
+sp.pprint(gradiente_no_ponto)
+
+
+print("***** Curvatura na direção *****")
+d = sp.Matrix([1/math.sqrt(2), 1/math.sqrt(2)])
+d = d / sp.sqrt(d.dot(d))
+
+curvatura = (d.T * hess_f * d)[0]
+print(f"\nCurvatura na direção d = (1/sqrt(2), 1/sqrt(2)) = {curvatura}")
+
+print("***** Pre-condicionamento ******")
+
+# Variáveis originais
+x1, x2 = sp.symbols('x1 x2')
+x = sp.Matrix([x1, x2])
+
+# Hessiana
+H = sp.hessian(f, (x1, x2))
+
+# Verificar se a Hessiana é simétrica
+if not H.is_symmetric():
+    print("A Hessiana não é simétrica, forçando a simetria.")
+    H = (H + H.T) / 2  # Forçar simetria
+
+# Verificar se a Hessiana é definida positiva
+autovalores = H.eigenvals()
+if all(val.is_positive for val in autovalores):
+    print("A Hessiana é definida positiva.")
+    # Decomposição de Cholesky da Hessiana (pré-condicionador)
+    try:
+        L = H.cholesky()  # H = L * L.T
+        print("Decomposição de Cholesky realizada com sucesso!")
+    except ValueError as e:
+        print(f"Erro na decomposição de Cholesky: {e}")
+else:
+    print("A Hessiana não é definida positiva, a decomposição de Cholesky não pode ser realizada.")
+
+# Nova variável z
+z1, z2 = sp.symbols('z1 z2')
+z = sp.Matrix([z1, z2])
+
+# Substituindo x = L * z na função original
+x_new = L * z if 'L' in locals() else None  # Verifica se L foi calculado
+if x_new is not None:
+    f_precond = f.subs({x1: x_new[0], x2: x_new[1]})
+
+    # Simplificando a nova função
+    f_precond_simplificada = sp.simplify(f_precond)
+
+    # Resultados
+    print("\n***** Matriz L (pré-condicionador) *****")
+    sp.pprint(L)
+
+    print("\n***** Função transformada f̃(z) *****")
+    sp.pprint(f_precond_simplificada)
+else:
+    print("Não foi possível realizar o pré-condicionamento devido à Hessiana não definida positiva.")
+
+
+print("\n# CAP2 - EXERCICIO 2.2. QUESTÃO 4")
+import math
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Definindo a função
+f = x1**2 + 2*x1*x2 + 2*x2**2
+
+# Gradiente: vetor das derivadas parciais
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+
+# Hessiana: matriz das segundas derivadas
+hess_f = sp.hessian(f, (x1, x2))
+
+# Exibindo os resultados
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\nMatriz Hessiana:")
+sp.pprint(hess_f)
+
+#CHecar se a matriz é convexa, concava ou nenhuma.
+def verifica_convexidade(f, vars):
+    H = sp.hessian(f, vars)
+    autovalores_de_h = H.eigenvals(multiple=True)
+
+    diagonal_nao_negativa = all(val.is_nonnegative for val in autovalores_de_h)
+    diagonal_nao_positiva = all(val.is_nonpositive for val in autovalores_de_h)
+
+    if diagonal_nao_negativa:
+        return "Função convexa, pois os autovalores da matriz hessiana são positivos."
+    elif diagonal_nao_positiva:
+        return "Função côncava, pois os autovalores da matriz hessiana não são todos positivos."
+    else:
+        return "Função nem côncava, nem convexa."
+
+print("***** Concavidade *****")
+
+print(verifica_convexidade(f, (x1,x2)))
+
+print("***** Gradiente no ponto especificado *****")
+x_barra = {x1: 1, x2: 1}
+gradiente_no_ponto = [g.subs(x_barra) for g in grad_f]
+print("Gradiente em x1 = 1 e x2 = 1: ")
+sp.pprint(gradiente_no_ponto)
+
+
+print("***** Curvatura na direção *****")
+d = sp.Matrix([1/math.sqrt(2), 1/math.sqrt(2)])
+d = d / sp.sqrt(d.dot(d))
+
+curvatura = (d.T * hess_f * d)[0]
+print(f"\nCurvatura na direção d = (1/sqrt(2), 1/sqrt(2)) = {curvatura}")
+
+print("***** Pre-condicionamento ******")
+
+# Variáveis originais
+x1, x2 = sp.symbols('x1 x2')
+x = sp.Matrix([x1, x2])
+
+# Hessiana
+H = sp.hessian(f, (x1, x2))
+
+# Verificar se a Hessiana é simétrica
+if not H.is_symmetric():
+    print("A Hessiana não é simétrica, forçando a simetria.")
+    H = (H + H.T) / 2  # Forçar simetria
+
+# Verificar se a Hessiana é definida positiva
+autovalores = H.eigenvals()
+if all(val.is_positive for val in autovalores):
+    print("A Hessiana é definida positiva.")
+    # Decomposição de Cholesky da Hessiana (pré-condicionador)
+    try:
+        L = H.cholesky()  # H = L * L.T
+        print("Decomposição de Cholesky realizada com sucesso!")
+    except ValueError as e:
+        print(f"Erro na decomposição de Cholesky: {e}")
+else:
+    print("A Hessiana não é definida positiva, a decomposição de Cholesky não pode ser realizada.")
+
+# Nova variável z
+z1, z2 = sp.symbols('z1 z2')
+z = sp.Matrix([z1, z2])
+
+# Substituindo x = L * z na função original
+x_new = L * z if 'L' in locals() else None  # Verifica se L foi calculado
+if x_new is not None:
+    f_precond = f.subs({x1: x_new[0], x2: x_new[1]})
+
+    # Simplificando a nova função
+    f_precond_simplificada = sp.simplify(f_precond)
+
+    # Resultados
+    print("\n***** Matriz L (pré-condicionador) *****")
+    sp.pprint(L)
+
+    print("\n***** Função transformada f̃(z) *****")
+    sp.pprint(f_precond_simplificada)
+else:
+    print("Não foi possível realizar o pré-condicionamento devido à Hessiana não definida positiva.")
+
+print("\n# CAP2 - EXERCICIO 2.2. QUESTÃO 5")
+
+import math
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+
+numero_de_euller = math.e
+x1, x2 = sp.symbols('x1 x2')
+
+# Definindo a função
+f = x1**2 - x1*x2 + 2*x2**2 - 2*x1 + numero_de_euller**(x1 + x2)
+
+# Gradiente: vetor das derivadas parciais
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+
+# Hessiana: matriz das segundas derivadas
+hess_f = sp.hessian(f, (x1, x2))
+
+# Exibindo os resultados
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\nMatriz Hessiana:")
+sp.pprint(hess_f)
+
+#CHecar se a matriz é convexa, concava ou nenhuma.
+def verifica_convexidade(f, vars):
+    H = sp.hessian(f, vars)
+    autovalores_de_h = H.eigenvals(multiple=True)
+
+    diagonal_nao_negativa = all(val.is_nonnegative for val in autovalores_de_h)
+    diagonal_nao_positiva = all(val.is_nonpositive for val in autovalores_de_h)
+
+    if diagonal_nao_negativa:
+        return "Função convexa, pois os autovalores da matriz hessiana são positivos."
+    elif diagonal_nao_positiva:
+        return "Função côncava, pois os autovalores da matriz hessiana não são todos positivos."
+    else:
+        return "Função nem côncava, nem convexa."
+
+print("***** Concavidade *****")
+
+print(verifica_convexidade(f, (x1,x2)))
+
+print("***** Gradiente no ponto especificado *****")
+x_barra = {x1: 0, x2: 0}
+gradiente_no_ponto = [g.subs(x_barra) for g in grad_f]
+print("Gradiente em x1 = 0 e x2 = 0: ")
+sp.pprint(gradiente_no_ponto)
+
+
+print("***** Curvatura na direção *****")
+d = sp.Matrix([1/math.sqrt(2), 1/math.sqrt(2)])
+d = d / sp.sqrt(d.dot(d))
+
+curvatura = (d.T * hess_f * d)[0]
+print(f"\nCurvatura na direção d = (1/sqrt(2), 1/sqrt(2)) = {curvatura}")
+
+
+print("***** Pre-condicionamento ******")
+
+# Variáveis originais
+x1, x2 = sp.symbols('x1 x2')
+x = sp.Matrix([x1, x2])
+
+# Hessiana
+H = sp.hessian(f, (x1, x2))
+
+# Verificar se a Hessiana é simétrica
+if not H.is_symmetric():
+    print("A Hessiana não é simétrica, forçando a simetria.")
+    H = (H + H.T) / 2  # Forçar simetria
+
+# Verificar se a Hessiana é definida positiva
+autovalores = H.eigenvals()
+if all(val.is_positive for val in autovalores):
+    print("A Hessiana é definida positiva.")
+    # Decomposição de Cholesky da Hessiana (pré-condicionador)
+    try:
+        L = H.cholesky()  # H = L * L.T
+        print("Decomposição de Cholesky realizada com sucesso!")
+    except ValueError as e:
+        print(f"Erro na decomposição de Cholesky: {e}")
+else:
+    print("A Hessiana não é definida positiva, a decomposição de Cholesky não pode ser realizada.")
+
+# Nova variável z
+z1, z2 = sp.symbols('z1 z2')
+z = sp.Matrix([z1, z2])
+
+# Substituindo x = L * z na função original
+x_new = L * z if 'L' in locals() else None  # Verifica se L foi calculado
+if x_new is not None:
+    f_precond = f.subs({x1: x_new[0], x2: x_new[1]})
+
+    # Simplificando a nova função
+    f_precond_simplificada = sp.simplify(f_precond)
+
+    # Resultados
+    print("\n***** Matriz L (pré-condicionador) *****")
+    sp.pprint(L)
+
+    print("\n***** Função transformada f̃(z) *****")
+    sp.pprint(f_precond_simplificada)
+else:
+    print("Não foi possível realizar o pré-condicionamento devido à Hessiana não definida positiva.")
+
+print("\n--------------CAPÍTULO 5--------------\n")
+
+print("\n# CAP5 - EXERCICIO 5.3 QUESTÃO 1")
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Função objetivo
+f = x1**2 + x2**2
+
+print("\n*** 1. Gradiente e Matriz Hessiana da Função Objetivo ***")
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+hess_f = sp.hessian(f, (x1, x2))
+
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\n***** Matriz Hessiana *****")
+sp.pprint(hess_f)
+
+print("\n*** 2. Identificação dos Pontos Críticos ***")
+pontos_criticos = sp.solve(grad_f, (x1, x2), dict=True)
+print("Pontos críticos:")
+sp.pprint(pontos_criticos)
+
+print("\n*** 3. Verificando Condições de Otimização Necessárias → Gradiente nulo  ***")
+for ponto in pontos_criticos:
+    print(f"\n Verificando ponto crítico: {ponto}")
+    grad_avaliado = [g.subs(ponto) for g in grad_f]
+    if all(val == 0 for val in grad_avaliado):
+        print("Gradiente nulo → condição necessária satisfeita.")
+    else:
+        print("Gradiente não nulo → não satisfaz condição necessária.")
+
+print("\n*** 4. Verificando Pontos Críticos ***")
+for ponto in pontos_criticos:
+    hess_avaliada = hess_f.subs(ponto)
+    autovalores = hess_avaliada.eigenvals()
+    print(f"\n Hessiana no ponto {ponto}:")
+    sp.pprint(hess_avaliada)
+    print("Autovalores:")
+    sp.pprint(autovalores)
+
+    if all(val.is_positive for val in autovalores):
+        print("Hessiana positiva definida → Mínimo local .")
+    elif all(val.is_negative for val in autovalores):
+        print("Hessiana negativa definida → Máximo local.")
+    else:
+        print("Hessiana indefinida → sem conclusão de otimalidade.")
+
+print("\n# CAP5 - EXERCICIO 5.3 QUESTÃO 2")
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Função objetivo
+f = (1/3*(x1**3)) + (x2**3) - x1- x2
+
+print("\n*** 1. Gradiente e Matriz Hessiana da Função Objetivo ***")
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+hess_f = sp.hessian(f, (x1, x2))
+
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\n***** Matriz Hessiana *****")
+sp.pprint(hess_f)
+
+print("\n*** 2. Identificação dos Pontos Críticos ***")
+pontos_criticos = sp.solve(grad_f, (x1, x2), dict=True)
+print("Pontos críticos:")
+sp.pprint(pontos_criticos)
+
+print("\n*** 3. Verificando Condições de Otimização Necessárias → Gradiente nulo  ***")
+for ponto in pontos_criticos:
+    print(f"\n Verificando ponto crítico: {ponto}")
+    grad_avaliado = [g.subs(ponto) for g in grad_f]
+    if all(val == 0 for val in grad_avaliado):
+        print("Gradiente nulo → condição necessária satisfeita.")
+    else:
+        print("Gradiente não nulo → não satisfaz condição necessária.")
+
+print("\n*** 4. Verificando Pontos Críticos ***")
+for ponto in pontos_criticos:
+    hess_avaliada = hess_f.subs(ponto)
+    autovalores = hess_avaliada.eigenvals()
+    print(f"\n Hessiana no ponto {ponto}:")
+    sp.pprint(hess_avaliada)
+    print("Autovalores:")
+    sp.pprint(autovalores)
+
+    if all(val.is_positive for val in autovalores):
+        print("Hessiana positiva definida → Mínimo local .")
+    elif all(val.is_negative for val in autovalores):
+        print("Hessiana negativa definida → Máximo local.")
+    else:
+        print("Hessiana indefinida → sem conclusão de otimalidade.")
+
+
+print("\n# CAP5 - EXERCICIO 5.3 QUESTÃO 4")
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Função objetivo
+f = x1**6 - (3*(x1**4)*(x2**2)) + (3*(x1**2)*(x2**4)) - x2**6
+
+print("\n*** 1. Gradiente e Matriz Hessiana da Função Objetivo ***")
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+hess_f = sp.hessian(f, (x1, x2))
+
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\n***** Matriz Hessiana *****")
+sp.pprint(hess_f)
+
+print("\n*** 2. Identificação dos Pontos Críticos ***")
+pontos_criticos = sp.solve(grad_f, (x1, x2), dict=True)
+print("Pontos críticos:")
+sp.pprint(pontos_criticos)
+
+print("\n*** 3. Verificando Condições de Otimização Necessárias → Gradiente nulo  ***")
+for ponto in pontos_criticos:
+    print(f"\n Verificando ponto crítico: {ponto}")
+    grad_avaliado = [g.subs(ponto) for g in grad_f]
+    if all(val == 0 for val in grad_avaliado):
+        print("Gradiente nulo → condição necessária satisfeita.")
+    else:
+        print("Gradiente não nulo → não satisfaz condição necessária.")
+
+print("\n*** 4. Verificando Pontos Críticos ***")
+for ponto in pontos_criticos:
+    hess_avaliada = hess_f.subs(ponto)
+    autovalores = hess_avaliada.eigenvals()
+    print(f"\n Hessiana no ponto {ponto}:")
+    sp.pprint(hess_avaliada)
+    print("Autovalores:")
+    sp.pprint(autovalores)
+
+    if all(val.is_positive for val in autovalores):
+        print("Hessiana positiva definida → Mínimo local .")
+    elif all(val.is_negative for val in autovalores):
+        print("Hessiana negativa definida → Máximo local.")
+    else:
+        print("Hessiana indefinida → sem conclusão de otimalidade.")
+
+print("\n # CAP5 - EXERCICIO 5.3 QUESTÃO 4")
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Função objetivo
+f = x1**6 - (3*(x1**4)*(x2**2)) + (3*(x1**2)*(x2**4)) - x2**6
+
+print("\n*** 1. Gradiente e Matriz Hessiana da Função Objetivo ***")
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+hess_f = sp.hessian(f, (x1, x2))
+
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\n***** Matriz Hessiana *****")
+sp.pprint(hess_f)
+
+print("\n*** 2. Identificação dos Pontos Críticos ***")
+pontos_criticos = sp.solve(grad_f, (x1, x2), dict=True)
+print("Pontos críticos:")
+sp.pprint(pontos_criticos)
+
+print("\n*** 3. Verificando Condições de Otimização Necessárias → Gradiente nulo  ***")
+for ponto in pontos_criticos:
+    print(f"\n Verificando ponto crítico: {ponto}")
+    grad_avaliado = [g.subs(ponto) for g in grad_f]
+    if all(val == 0 for val in grad_avaliado):
+        print("Gradiente nulo → condição necessária satisfeita.")
+    else:
+        print("Gradiente não nulo → não satisfaz condição necessária.")
+
+print("\n*** 4. Verificando Pontos Críticos ***")
+for ponto in pontos_criticos:
+    hess_avaliada = hess_f.subs(ponto)
+    autovalores = hess_avaliada.eigenvals()
+    print(f"\n Hessiana no ponto {ponto}:")
+    sp.pprint(hess_avaliada)
+    print("Autovalores:")
+    sp.pprint(autovalores)
+
+    if all(val.is_positive for val in autovalores):
+        print("Hessiana positiva definida → Mínimo local .")
+    elif all(val.is_negative for val in autovalores):
+        print("Hessiana negativa definida → Máximo local.")
+    else:
+        print("Hessiana indefinida → sem conclusão de otimalidade.")
+
+
+print("\n# CAP5 - EXERCICIO 5.3 QUESTÃO 5")
+
+import sympy as sp
+
+# Definindo as variáveis simbólicas
+x1, x2 = sp.symbols('x1 x2')
+
+# Função objetivo
+f = (0.5 * (x1**2)) + 4.5*(x2**2)
+
+print("\n*** 1. Gradiente e Matriz Hessiana da Função Objetivo ***")
+grad_f = [sp.diff(f, var) for var in (x1, x2)]
+hess_f = sp.hessian(f, (x1, x2))
+
+print("***** Gradiente *****")
+sp.pprint(grad_f)
+
+print("\n***** Matriz Hessiana *****")
+sp.pprint(hess_f)
+
+print("\n*** 2. Identificação dos Pontos Críticos ***")
+pontos_criticos = sp.solve(grad_f, (x1, x2), dict=True)
+print("Pontos críticos:")
+sp.pprint(pontos_criticos)
+
+print("\n*** 3. Verificando Condições de Otimização Necessárias → Gradiente nulo  ***")
+for ponto in pontos_criticos:
+    print(f"\n Verificando ponto crítico: {ponto}")
+    grad_avaliado = [g.subs(ponto) for g in grad_f]
+    if all(val == 0 for val in grad_avaliado):
+        print("Gradiente nulo → condição necessária satisfeita.")
+    else:
+        print("Gradiente não nulo → não satisfaz condição necessária.")
+
+print("\n*** 4. Verificando Pontos Críticos ***")
+for ponto in pontos_criticos:
+    hess_avaliada = hess_f.subs(ponto)
+    autovalores = hess_avaliada.eigenvals()
+    print(f"\n Hessiana no ponto {ponto}:")
+    sp.pprint(hess_avaliada)
+    print("Autovalores:")
+    sp.pprint(autovalores)
+
+    if all(val.is_positive for val in autovalores):
+        print("Hessiana positiva definida → Mínimo local .")
+    elif all(val.is_negative for val in autovalores):
+        print("Hessiana negativa definida → Máximo local.")
+    else:
+        print("Hessiana indefinida → sem conclusão de otimalidade.")
+
 
